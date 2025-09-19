@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TrendingUp, TrendingDown, Users, DollarSign, Target, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, DollarSign, Target, Calendar, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 
 interface FinancialData {
@@ -48,6 +49,53 @@ const FinancialDashboard = () => {
     impact: "Current state - maintaining runway",
     budgetLeft: 485000
   });
+
+  const exportScenario = () => {
+    const timestamp = new Date().toLocaleString();
+    const reportContent = `CFO Helper - Financial Scenario Report
+Generated: ${timestamp}
+
+=== SCENARIO PARAMETERS ===
+Additional Employees: ${scenario.additionalEmployees}
+Marketing Adjustment: ₹${scenario.marketingAdjustment.toLocaleString()}
+Price Adjustment: ${scenario.priceAdjustment}%
+
+=== CURRENT BASELINE ===
+Runway: ${baseData.currentRunway} months
+Budget: ₹${baseData.currentBudget.toLocaleString()}
+Monthly Burn: ₹${baseData.monthlyBurn.toLocaleString()}
+Revenue: ₹${baseData.revenue.toLocaleString()}
+Employees: ${baseData.employees}
+Marketing Spend: ₹${baseData.marketingSpend.toLocaleString()}
+Product Price: ₹${baseData.productPrice}
+
+=== SCENARIO RESULTS ===
+New Runway: ${Math.round(result.runway)} months
+Available Budget: ₹${result.budgetLeft.toLocaleString()}
+Monthly P&L: ${result.profitLoss >= 0 ? '+' : ''}₹${result.profitLoss.toLocaleString()}
+Team Size: ${baseData.employees + scenario.additionalEmployees}
+
+=== IMPACT ANALYSIS ===
+${result.impact}
+
+=== BUDGET BREAKDOWN ===
+Available Budget: ₹${result.budgetLeft.toLocaleString()}
+Marketing Spend: ₹${(baseData.marketingSpend + scenario.marketingAdjustment).toLocaleString()}
+Employee Costs (6 months): ₹${((baseData.employees + scenario.additionalEmployees) * 8000 * 6).toLocaleString()}
+
+--- End of Report ---`;
+
+    // Create and download the file
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `CFO_Helper_Scenario_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
   const calculateScenario = () => {
     const employeeCost = 8000; // Average cost per employee per month
@@ -125,9 +173,15 @@ const FinancialDashboard = () => {
           <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             CFO Helper
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Financial scenario planning with real-time impact analysis
-          </p>
+          <div className="flex items-center justify-center gap-4">
+            <p className="text-muted-foreground text-lg">
+              Financial scenario planning with real-time impact analysis
+            </p>
+            <Button onClick={exportScenario} variant="outline" size="sm" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Report
+            </Button>
+          </div>
         </div>
 
         {/* Key Metrics */}
