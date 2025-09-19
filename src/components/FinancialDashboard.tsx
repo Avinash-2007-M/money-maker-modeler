@@ -26,7 +26,7 @@ interface ScenarioResult {
 }
 
 const FinancialDashboard = () => {
-  const [baseData] = useState<FinancialData>({
+  const [baseData, setBaseData] = useState<FinancialData>({
     currentRunway: 12,
     currentBudget: 500000,
     monthlyBurn: 42000,
@@ -35,6 +35,10 @@ const FinancialDashboard = () => {
     marketingSpend: 15000,
     productPrice: 99
   });
+
+  const updateBaseData = (field: keyof FinancialData, value: number) => {
+    setBaseData(prev => ({ ...prev, [field]: value }));
+  };
 
   const [scenario, setScenario] = useState({
     additionalEmployees: 0,
@@ -142,7 +146,7 @@ Employee Costs (6 months): ₹${((baseData.employees + scenario.additionalEmploy
 
   useEffect(() => {
     calculateScenario();
-  }, [scenario]);
+  }, [scenario, baseData]);
 
   const chartData = [
     {
@@ -246,8 +250,67 @@ Employee Costs (6 months): ₹${((baseData.employees + scenario.additionalEmploy
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Baseline Data Inputs */}
+          <Card className="bg-gradient-card border-border shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Baseline Financial Data
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="budget">Available Budget (₹)</Label>
+                <Input
+                  id="budget"
+                  type="number"
+                  value={baseData.currentBudget}
+                  onChange={(e) => updateBaseData('currentBudget', parseInt(e.target.value) || 0)}
+                  className="bg-muted border-border"
+                  step="10000"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="team">Current Team Size</Label>
+                <Input
+                  id="team"
+                  type="number"
+                  value={baseData.employees}
+                  onChange={(e) => updateBaseData('employees', parseInt(e.target.value) || 0)}
+                  className="bg-muted border-border"
+                  min="1"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="revenue">Monthly Revenue (₹)</Label>
+                <Input
+                  id="revenue"
+                  type="number"
+                  value={baseData.revenue}
+                  onChange={(e) => updateBaseData('revenue', parseInt(e.target.value) || 0)}
+                  className="bg-muted border-border"
+                  step="1000"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="burn">Monthly Burn Rate (₹)</Label>
+                <Input
+                  id="burn"
+                  type="number"
+                  value={baseData.monthlyBurn}
+                  onChange={(e) => updateBaseData('monthlyBurn', parseInt(e.target.value) || 0)}
+                  className="bg-muted border-border"
+                  step="1000"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Scenario Controls */}
           <Card className="bg-gradient-card border-border shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -326,7 +389,7 @@ Employee Costs (6 months): ₹${((baseData.employees + scenario.additionalEmploy
           </Card>
 
           {/* Budget Allocation Chart */}
-          <Card className="bg-gradient-card border-border shadow-card">
+          <Card className="bg-gradient-card border-border shadow-card lg:col-span-1">
             <CardHeader>
               <CardTitle>Budget Allocation</CardTitle>
             </CardHeader>
